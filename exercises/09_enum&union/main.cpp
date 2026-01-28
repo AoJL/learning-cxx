@@ -12,7 +12,7 @@ enum ColorEnum : unsigned char {
     COLOR_YELLOW,
     COLOR_BLUE,
 };
-
+ 
 // 有作用域枚举型是 C++ 引入的类型安全枚举。
 // 其内部标识符需要带前缀引用，如 `Color::Red`。
 // 作用域枚举型可以避免命名空间污染，并提供类型安全保证。
@@ -37,7 +37,10 @@ ColorEnum convert_by_pun(Color c) {
 
     TypePun pun;
     // TODO: 补全类型双关转换
+    pun.c = c; // 第一步，将输入的作用域枚举Color存入union
 
+    //第二步：通过读取同一块内存地址上的ColorEnum e成员
+    //强制编译器将其解释为ColorEnum类型并返回
     return pun.e;
 }
 

@@ -15,21 +15,45 @@ class DynFibonacci {
 
 public:
     // TODO: 实现动态设置容量的构造器
-    DynFibonacci(int capacity): cache(new ?), cached(?) {}
+    DynFibonacci(int capacity): cache(new size_t[capacity]), cached(2) {
+        if(capacity > 0) cache[0] = 0;
+        if(capacity > 1) cache[1] = 1;  
+    }
 
     // TODO: 实现移动构造器
-    DynFibonacci(DynFibonacci &&) noexcept = delete;
+    //直接接管other的资源，并将other置于有效但未定义状态（指针置为空）
+    DynFibonacci(DynFibonacci &&other) noexcept : cache(other.cache), cached(other.cached) {
+        other.cache = nullptr;
+        other.cached = 0;
+    }
 
     // TODO: 实现移动赋值
     // NOTICE: ⚠ 注意移动到自身问题 ⚠
-    DynFibonacci &operator=(DynFibonacci &&) noexcept = delete;
+    DynFibonacci &operator=(DynFibonacci &&other) noexcept {
+        //1.检查自赋值（例如a = std::move(a);）
+        if(this != &other) {
+            //2.释放当前对象已有的资源
+            delete[] cache;
+            //3.夺取other的资源
+            cache = other.cache;
+            cached = other.cached;
+            //4.将other置空，防止其析构时释放我们刚刚夺取的内存
+            other.cache = nullptr;
+            other.cached = 0;
+        }
+        return *this;
+    }
 
     // TODO: 实现析构器，释放缓存空间
-    ~DynFibonacci();
+    ~DynFibonacci() {
+        if(cache) {
+            delete[] cache;
+        }
+    }
 
     // TODO: 实现正确的缓存优化斐波那契计算
     size_t operator[](int i) {
-        for (; false; ++cached) {
+        for (; cached <= i; ++cached) {
             cache[cached] = cache[cached - 1] + cache[cached - 2];
         }
         return cache[i];
@@ -51,6 +75,7 @@ int main(int argc, char **argv) {
     DynFibonacci fib(12);
     ASSERT(fib[10] == 55, "fibonacci(10) should be 55");
 
+    //调用移动构造函数
     DynFibonacci const fib_ = std::move(fib);
     ASSERT(!fib.is_alive(), "Object moved");
     ASSERT(fib_[10] == 55, "fibonacci(10) should be 55");
@@ -58,7 +83,9 @@ int main(int argc, char **argv) {
     DynFibonacci fib0(6);
     DynFibonacci fib1(12);
 
+    //调用移动赋值
     fib0 = std::move(fib1);
+    //测试移动自赋值
     fib0 = std::move(fib0);
     ASSERT(fib0[10] == 55, "fibonacci(10) should be 55");
 

@@ -10,17 +10,27 @@ class DynFibonacci {
 
 public:
     // TODO: 实现动态设置容量的构造器
-    DynFibonacci(int capacity): cache(new ?), cached(?) {}
+    DynFibonacci(int capacity): cache(new size_t[capacity]), cached(2) {
+        if(capacity > 0) cache[0] = 0;
+        if(capacity > 1) cache[1] = 1;
+    }
 
     // TODO: 实现复制构造器
-    DynFibonacci(DynFibonacci const &) = delete;
+    //这里需要深拷贝：为新对象分配独立的内存，并从原对象复制数据
+    DynFibonacci(DynFibonacci const &other) : cache(new size_t[other.cached]), cached(other.cached) {
+        for(int i = 0; i < other.cached; ++i) {
+            cache[i] = other.cache[i];
+        }
+    }
 
     // TODO: 实现析构器，释放缓存空间
-    ~DynFibonacci();
+    ~DynFibonacci(){
+        delete[] cache;
+    };
 
     // TODO: 实现正确的缓存优化斐波那契计算
     size_t get(int i) {
-        for (; false; ++cached) {
+        for (; cached <= i; ++cached) {
             cache[cached] = cache[cached - 1] + cache[cached - 2];
         }
         return cache[i];
@@ -41,7 +51,10 @@ public:
 int main(int argc, char **argv) {
     DynFibonacci fib(12);
     ASSERT(fib.get(10) == 55, "fibonacci(10) should be 55");
+    
     DynFibonacci const fib_ = fib;
+    
     ASSERT(fib_.get(10) == fib.get(10), "Object cloned");
+    std::cout << "fibonacci(10) = " << fib_.get(10) << std::endl;
     return 0;
 }

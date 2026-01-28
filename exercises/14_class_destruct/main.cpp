@@ -11,14 +11,22 @@ class DynFibonacci {
 
 public:
     // TODO: 实现动态设置容量的构造器
-    DynFibonacci(int capacity): cache(new ?), cached(?) {}
+    //动态分配容量为capacity的size_t数组，并初始化前两个斐波那契数
+    DynFibonacci(int capacity): cache(new size_t[capacity]), cached(2) {
+        if(capacity > 0) cache[0] = 0;
+        if(capacity > 1) cache[1] = 1;
+    }
 
     // TODO: 实现析构器，释放缓存空间
-    ~DynFibonacci();
+    //根据 RAII 原则，在对象销毁时使用delete[]释放dynamic分配的数组
+    ~DynFibonacci(){
+        delete[] cache;
+    }
 
     // TODO: 实现正确的缓存优化斐波那契计算
     size_t get(int i) {
-        for (; false; ++cached) {
+        //当需要获取的索引i尚未被缓存时，从已有的cached位置开始递推计算
+        for (; cached <= i; ++cached) {
             cache[cached] = cache[cached - 1] + cache[cached - 2];
         }
         return cache[i];
